@@ -14,3 +14,10 @@ This project contains a simple static front‑end and a basic Node.js/Express ba
 3. Visit `http://localhost:3000/login.html` to access the login form.
 
 Submitted users are appended to `users.json` in the project root.
+
+The site now includes two forms:
+
+* `/register.html` – create a new account (username, email, password). Passwords must be at least 8 characters long and include an uppercase letter, a number, and a special character. Duplicate entries are prevented.
+* `/login.html` – existing users sign in with the same credentials (including password); an error is shown if they are not found or the password doesn't match.
+
+Navigation links for Sign Up / Sign In are available in the header.

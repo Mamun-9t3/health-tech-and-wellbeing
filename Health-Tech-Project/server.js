@@ -12,10 +12,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname));
 
-app.post('/login', (req, res) => {
-  const { username, email } = req.body;
-  if (!username || !email) {
-    return res.status(400).send('username and email required');
+// registration endpoint
+app.post('/register', (req, res) => {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).send('username, email and password required');
+  }
+
+  // enforce password rules server-side as well
+  const pwdRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+  if (!pwdRegex.test(password)) {
+    return res.redirect('register.html?error=weakpassword');
   }
 
   let users = [];
@@ -27,14 +34,43 @@ app.post('/login', (req, res) => {
     }
   }
 
-  users.push({ username, email, timestamp: new Date().toISOString() });
+  const exists = users.find(u => u.username === username || u.email === email);
+  if (exists) {
+    return res.redirect('register.html?error=exists');
+  }
 
+  users.push({ username, email, password, timestamp: new Date().toISOString() });
   try {
     fs.writeFileSync(dataFile, JSON.stringify(users, null, 2));
   } catch (err) {
     console.error('write error', err);
   }
 
+  res.redirect('index.html');
+});
+
+// login endpoint for existing users
+app.post('/login', (req, res) => {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).send('username, email and password required');
+  }
+
+  let users = [];
+  if (fs.existsSync(dataFile)) {
+    try {
+      users = JSON.parse(fs.readFileSync(dataFile, 'utf-8')) || [];
+    } catch (err) {
+      console.error('read error', err);
+    }
+  }
+
+  const exists = users.find(u => u.username === username && u.email === email && u.password === password);
+  if (!exists) {
+    return res.redirect('login.html?error=notfound');
+  }
+
+  // successful login
   res.redirect('index.html');
 });
 

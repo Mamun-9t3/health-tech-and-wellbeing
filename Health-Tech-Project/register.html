@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>Register</title>
     <!-- global stylesheet -->
     <link rel="stylesheet" href="style.css" />
     <style>
@@ -63,9 +63,9 @@
   <body>
     <div class="login-container">
       <div class="login-card">
-        <h2>Welcome Back</h2>
+        <h2>Create Account</h2>
         <p id="errorMsg" style="color:#e00; text-align:center; display:none;"></p>
-        <form id="loginForm" action="/login" method="post">
+        <form id="registerForm" action="/register" method="post">
           <label for="username">Username</label>
           <input type="text" id="username" name="username" placeholder="Your username" required>
 
@@ -74,7 +74,7 @@
 
           <label for="password">Password</label>
           <div style="position:relative;">
-            <input type="password" id="password" name="password" placeholder="Your password" required style="padding-right:32px;">
+            <input type="password" id="password" name="password" placeholder="Create a password" required style="padding-right:32px;">
             <span id="togglePwd" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:1.1rem; color:#888;">👁️</span>
           </div>
 
@@ -82,23 +82,27 @@
             Minimum 8 characters, one uppercase, one number and one special character.
           </small>
 
-          <button type="submit" class="btn-primary">Login</button>
+          <button type="submit" class="btn-primary" id="Sign_up">Sign Up</button>
         </form>
         <p style="text-align:center; margin-top:16px;">
-          New here? <a href="register.html" id="create_account">Create an account</a>
+          Already have an account? <a href="login.html">Log in</a>
         </p>
       </div>
-    </div>    <script>
+    </div>
+    <script>
       function showErrorMessage() {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('error') === 'notfound') {
-          const msg = document.getElementById('errorMsg');
-          msg.textContent = 'No account matches those credentials.';
+        const msg = document.getElementById('errorMsg');
+        const err = params.get('error');
+        if (err === 'exists') {
+          msg.textContent = 'User already exists. Please choose a different username or email.';
+          msg.style.display = 'block';
+        } else if (err === 'weakpassword') {
+          msg.textContent = 'Password does not meet complexity requirements.';
           msg.style.display = 'block';
         }
       }
-
-      document.getElementById('loginForm').addEventListener('submit', function(e) {
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
         const pwd = document.getElementById('password').value;
         const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
         if (!regex.test(pwd)) {
@@ -107,7 +111,6 @@
         }
       });
 
-      // toggle visibility
       document.getElementById('togglePwd').addEventListener('click', function() {
         const input = document.getElementById('password');
         if (input.type === 'password') {
@@ -120,5 +123,6 @@
       });
 
       showErrorMessage();
-    </script>  </body>
+    </script>
+  </body>
 </html>

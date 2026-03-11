@@ -18,7 +18,13 @@ a {
   text-decoration: none;
   color: inherit;
 }
-
+/* ==== login card ==== */
+#create_account:hover {
+  color: #0046ff;
+}
+#Sign_up:hover {
+color: #ffff;
+}
 /* ===== NAVBAR ===== */
 .navbar {
   display: flex;
@@ -66,6 +72,26 @@ a {
 .nav-links a:hover,
 .nav-links a.active {
   color: #0046ff;
+}
+
+/* ensure button-style links inside nav adapt appropriately */
+.nav-links .btn-primary {
+  padding: 6px 18px;
+  font-size: 0.95rem;
+  border-radius: 24px;
+  background: #0046ff;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 70, 255, 0.2);
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.nav-links .btn-primary:hover {
+  background: #2958db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 70, 255, 0.3);
 }
 
 .nav-links a.active::after {
@@ -154,7 +180,7 @@ a {
 }
 
 .btn-primary:hover {
-  background: #0035cc;
+  background: #204fd2;
   transform: translateY(-1px);
 }
 
