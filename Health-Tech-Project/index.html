@@ -1,73 +1,176 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Health Companion</title>
-    <link rel="stylesheet" href="style.css" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <nav class="navbar">
-      <h2 class="logo">Health Companion</h2>
-      <ul class="nav-links">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Wellness</a></li>
-        <li><a href="#">Symptoms</a></li>
-        <li><a href="#">Clinics</a></li>
-        <li><a href="#">AI Doctor</a></li>
-      </ul>
-    </nav>
-    <div class="hero">
-      <h1>🏥 Health Companion</h1>
-      <p>Smart Wellness + AI Health Assistant</p>
-    </div>
-    <!-- Wellness Section -->
-    <div class="card">
-      <h2>🌿 Wellness Timer</h2>
-      <h3 id="time">25:00</h3>
-      <div class="progress-bar">
-        <div id="progress"></div>
+    <header class="navbar">
+      <div class="navbar__brand">
+        <span class="logo">Health Companion</span>
+        <span class="tagline">Wellness, Care, Confidence</span>
       </div>
-      <button onclick="startTimer()">Start Work Session</button>
-      <div class="buttons">
-        <button onclick="addScore()">💧 Drink Water</button>
-        <button onclick="addScore()">🧘 Stretch</button>
-        <button onclick="addScore()">🌬 Breathing</button>
-      </div>
-      <p id="score">Score: 0</p>
-    </div>
-    <!-- Symptom Checker -->
-    <div class="card">
-      <h2>🧠 AI Symptom Checker</h2>
-      <input id="symptom" placeholder="Enter symptoms" />
-      <button onclick="checkSymptom()">Check Doctor</button>
-      <p id="result"></p>
-    </div>
-    <!-- Map -->
-    <div class="card">
-      <h2>📍 Find Hospitals</h2>
-      <button onclick="showMap()">Show Nearby Hospitals</button>
-      <div id="map" style="display: none">
-        <iframe
-          width="100%"
-          height="300"
-          style="border-radius: 8px; border: 0"
-          src="https://www.google.com/maps?q=hospital+near+me&output=embed"
-        >
-        </iframe>
-      </div>
-    </div>
-    <!-- Chatbot -->
-    <div class="card">
-      <h2>🤖 AI Doctor Chatbot</h2>
-      <div id="chatbox"></div>
-      <input id="userInput" placeholder="Ask about symptoms" />
-      <button onclick="chat()">Send</button>
-    </div>
+
+      <button class="navbar__toggle" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="navbar__nav">
+        <ul class="nav-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#wellness">Wellness</a></li>
+          <li><a href="#symptoms">Symptoms</a></li>
+          <li><a href="#clinics">Clinics</a></li>
+          <li><a href="#chat">AI Doctor</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section id="home" class="hero">
+        <div class="hero__content">
+          <h1>🏥 Health Companion</h1>
+          <p>
+            Your smart wellness dashboard with symptom triage, reminders, and a
+            friendly AI doctor.
+          </p>
+          <div class="hero__actions">
+            <a href="#wellness" class="btn btn--primary">Start Wellness</a>
+            <a href="#chat" class="btn btn--ghost">Talk to AI Doctor</a>
+          </div>
+        </div>
+        <div class="hero__illustration" aria-hidden="true">
+          <div class="pulse"></div>
+        </div>
+      </section>
+
+      <section id="wellness" class="cards">
+        <article class="card">
+          <header class="card__header">
+            <h2>🌿 Wellness Timer</h2>
+            <p class="card__subtitle">Focus sessions with hydration reminders.</p>
+          </header>
+
+          <div class="card__body">
+            <div class="timer">
+              <h3 id="time">25:00</h3>
+              <div class="progress-bar">
+                <div id="progress"></div>
+              </div>
+            </div>
+
+            <div class="card__actions">
+              <button class="btn btn--primary" onclick="startTimer()">
+                Start Session
+              </button>
+            </div>
+
+            <div class="activity-buttons">
+              <button class="btn btn--ghost" onclick="addScore()">
+                💧 Drink Water
+              </button>
+              <button class="btn btn--ghost" onclick="addScore()">
+                🧘 Stretch
+              </button>
+              <button class="btn btn--ghost" onclick="addScore()">
+                🌬 Breathe
+              </button>
+            </div>
+
+            <p class="score" id="score">Score: 0</p>
+          </div>
+        </article>
+
+        <article id="symptoms" class="card">
+          <header class="card__header">
+            <h2>🧠 AI Symptom Checker</h2>
+            <p class="card__subtitle">Get quick guidance based on your symptoms.</p>
+          </header>
+
+          <div class="card__body">
+            <input
+              id="symptom"
+              class="input"
+              placeholder="Describe how you feel..."
+              aria-label="Enter symptoms"
+            />
+            <button class="btn btn--primary" onclick="checkSymptom()">
+              Check Doctor
+            </button>
+            <p class="result" id="result"></p>
+          </div>
+        </article>
+
+        <article id="clinics" class="card">
+          <header class="card__header">
+            <h2>📍 Find Hospitals</h2>
+            <p class="card__subtitle">Locate nearby care centers instantly.</p>
+          </header>
+
+          <div class="card__body">
+            <button class="btn btn--primary" onclick="showMap()">
+              Show Nearby Hospitals
+            </button>
+            <div id="map" class="map" aria-hidden="true">
+              <iframe
+                width="100%"
+                height="300"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps?q=hospital+near+me&output=embed"
+              ></iframe>
+            </div>
+          </div>
+        </article>
+
+        <article id="chat" class="card">
+          <header class="card__header">
+            <h2>🤖 AI Doctor Chatbot</h2>
+            <p class="card__subtitle">Ask questions and get friendly advice.</p>
+          </header>
+
+          <div class="card__body">
+            <div id="chatbox" class="chatbox" aria-live="polite"></div>
+            <div class="chat-input">
+              <input
+                id="userInput"
+                class="input"
+                placeholder="Ask about symptoms"
+                aria-label="Ask about symptoms"
+              />
+              <button class="btn btn--primary" onclick="chat()">Send</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© <span id="year"></span> Health Companion • Built with care</p>
+    </footer>
+
     <script src="script.js"></script>
+    <script>
+      const year = new Date().getFullYear();
+      document.getElementById("year").textContent = year;
+
+      const navToggle = document.querySelector(".navbar__toggle");
+      const nav = document.querySelector(".navbar__nav");
+
+      navToggle.addEventListener("click", () => {
+        nav.classList.toggle("navbar__nav--open");
+      });
+    </script>
   </body>
 </html>
