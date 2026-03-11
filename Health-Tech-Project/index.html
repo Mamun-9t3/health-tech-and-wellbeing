@@ -1,95 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<title>Health Companion</title>
-<link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-<div class="hero">
-<h1>🏥 Health Companion</h1>
-<p>Smart Wellness + AI Health Assistant</p>
-</div>
-
-<!-- Wellness Section -->
-
-<div class="card">
-
-<h2>🌿 Wellness Timer</h2>
-
-<h3 id="time">25:00</h3>
-
-<div class="progress-bar">
-<div id="progress"></div>
-</div>
-
-<button onclick="startTimer()">Start Work Session</button>
-
-<div class="buttons">
-<button onclick="addScore()">💧 Drink Water</button>
-<button onclick="addScore()">🧘 Stretch</button>
-<button onclick="addScore()">🌬 Breathing</button>
-</div>
-
-<p id="score">Score: 0</p>
-
-</div>
-
-
-<!-- Symptom Checker -->
-
-<div class="card">
-
-<h2>🧠 AI Symptom Checker</h2>
-
-<input id="symptom" placeholder="Enter symptoms">
-
-<button onclick="checkSymptom()">Check Doctor</button>
-
-<p id="result"></p>
-
-</div>
-
-
-<!-- Map -->
-
-<div class="card">
-
-<h2>📍 Find Hospitals</h2>
-
-<button onclick="showMap()">Show Nearby Hospitals</button>
-
-<div id="map" style="display:none">
-
-<iframe
-width="100%"
-height="300"
-style="border-radius:8px;border:0"
-src="https://www.google.com/maps?q=hospital+near+me&output=embed">
-</iframe>
-
-</div>
-
-</div>
-
-
-<!-- Chatbot -->
-
-<div class="card">
-
-<h2>🤖 AI Doctor Chatbot</h2>
-
-<div id="chatbox"></div>
-
-<input id="userInput" placeholder="Ask about symptoms">
-
-<button onclick="chat()">Send</button>
-
-</div>
-
-
-<script src="script.js"></script>
-
-</body>
+  <head>
+    <title>Health Companion</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <h2 class="logo">Health Companion</h2>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Wellness</a></li>
+        <li><a href="#">Symptoms</a></li>
+        <li><a href="#">Clinics</a></li>
+        <li><a href="#">AI Doctor</a></li>
+      </ul>
+    </nav>
+    <div class="hero">
+      <h1>🏥 Health Companion</h1>
+      <p>Smart Wellness + AI Health Assistant</p>
+    </div>
+    <!-- Wellness Section -->
+    <div class="card">
+      <h2>🌿 Wellness Timer</h2>
+      <h3 id="time">25:00</h3>
+      <div class="progress-bar">
+        <div id="progress"></div>
+      </div>
+      <button onclick="startTimer()">Start Work Session</button>
+      <div class="buttons">
+        <button onclick="addScore()">💧 Drink Water</button>
+        <button onclick="addScore()">🧘 Stretch</button>
+        <button onclick="addScore()">🌬 Breathing</button>
+      </div>
+      <p id="score">Score: 0</p>
+    </div>
+    <!-- Symptom Checker -->
+    <div class="card">
+      <h2>🧠 AI Symptom Checker</h2>
+      <input id="symptom" placeholder="Enter symptoms" />
+      <button onclick="checkSymptom()">Check Doctor</button>
+      <p id="result"></p>
+    </div>
+    <!-- Map -->
+    <div class="card">
+      <h2>📍 Find Hospitals</h2>
+      <button onclick="showMap()">Show Nearby Hospitals</button>
+      <div id="map" style="display: none">
+        <iframe
+          width="100%"
+          height="300"
+          style="border-radius: 8px; border: 0"
+          src="https://www.google.com/maps?q=hospital+near+me&output=embed"
+        >
+        </iframe>
+      </div>
+    </div>
+    <!-- Chatbot -->
+    <div class="card">
+      <h2>🤖 AI Doctor Chatbot</h2>
+      <div id="chatbox"></div>
+      <input id="userInput" placeholder="Ask about symptoms" />
+      <button onclick="chat()">Send</button>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>

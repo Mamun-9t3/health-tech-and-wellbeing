@@ -1,11 +1,49 @@
 body{
 margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#6dd5ed,#2193b0);
+font-family: "Poppins", sans-serif;
+background:linear-gradient(180deg,#f3efe3,#769383);
 color:white;
 text-align:center;
 }
+/* NAVBAR */
 
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 40px;
+background: #ffff;
+box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+backdrop-filter:blur(10px);
+margin-left: 30px;
+width:90%;
+height: 50px;
+margin-top: 10px;
+border-radius: 30px;
+}
+
+.logo{
+font-weight:600;
+color: #000;
+}
+
+.nav-links{
+list-style:none;
+display:flex;
+gap:25px;
+}
+
+.nav-links a{
+text-decoration:none;
+color:white;
+font-weight:400;
+transition:0.3s;
+color: #000;
+}
+
+.nav-links a:hover{
+opacity:0.7;
+}
 .hero{
 padding:80px 20px;
 animation:fade 2s;
@@ -17,7 +55,7 @@ to{opacity:1;transform:translateY(0)}
 }
 
 .card{
-background:rgba(255,255,255,0.15);
+background: linear-gradient(135deg, #0046FF,#001BB7);
 backdrop-filter:blur(10px);
 border-radius:15px;
 padding:25px;
