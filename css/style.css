@@ -1,0 +1,698 @@
+/* ===== RESET & BASE ===== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: #f5f7fa;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+/* ==== login card ==== */
+#create_account:hover {
+  color: #0046ff;
+}
+#Sign_up:hover {
+color: #ffff;
+}
+/* ===== NAVBAR ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 48px;
+  height: 70px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0046ff;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #1e293b;
+  padding: 4px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+}
+
+.nav-links a {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #475569;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #0046ff;
+}
+
+/* ensure button-style links inside nav adapt appropriately */
+.nav-links .btn-primary {
+  padding: 6px 18px;
+  font-size: 0.95rem;
+  border-radius: 24px;
+  background: #0046ff;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 70, 255, 0.2);
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.nav-links .btn-secondary {
+  padding: 6px 18px;
+  font-size: 0.95rem;
+  border-radius: 24px;
+  background: #0046ff;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 70, 255, 0.2);
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.nav-links .btn-primary:hover,
+.nav-links .btn-secondary:hover {
+  background: #0033cc;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 70, 255, 0.3);
+}
+
+.nav-links .btn-secondary:hover {
+  background: #0033cc;
+  color: #fff;
+}
+
+.nav-links a.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #0046ff;
+  border-radius: 2px;
+}
+
+/* ===== HERO (Homepage) ===== */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 100px 24px 60px;
+  background: linear-gradient(135deg, #0046ff 0%, #001bb7 100%);
+  color: #fff;
+  animation: fadeUp 0.8s ease-out;
+}
+
+.hero-content {
+  max-width: 640px;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.hero .highlight {
+  background: linear-gradient(90deg, #00c6ff, #00ff9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+/* ===== PAGE HERO (Feature pages) ===== */
+.page-hero {
+  text-align: center;
+  padding: 60px 24px 32px;
+  background: linear-gradient(135deg, #0046ff 0%, #001bb7 100%);
+  color: #fff;
+  animation: fadeUp 0.6s ease-out;
+}
+
+.page-hero h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.page-hero p {
+  font-size: 1.05rem;
+  opacity: 0.85;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #0046ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.btn-primary:hover {
+  background: #204fd2;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 70, 255, 0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0, 60, 255, 0.25);
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 10px 22px;
+  background: transparent;
+  color: #0046ff;
+  border: 2px solid #0046ff;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #0046ff;
+  color: #fff;
+}
+
+/* ===== FEATURE CARDS (Homepage) ===== */
+.features {
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #1e293b;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 70, 255, 0.12);
+}
+
+.card-icon {
+  font-size: 2.8rem;
+  margin-bottom: 16px;
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+
+.card p {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.card-link {
+  font-weight: 600;
+  color: #0046ff;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+/* ===== PAGE CONTENT (Feature pages) ===== */
+.page-content {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.feature-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.feature-card h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1e293b;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 0.92rem;
+  margin-bottom: 20px;
+}
+
+/* ===== WELLNESS PAGE ===== */
+.timer-display {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #0046ff;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+#progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0046ff, #00c6ff);
+  border-radius: 8px;
+  transition: width 0.3s;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.habit-grid {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.habit-btn {
+  padding: 12px 20px;
+  background: #f0f4ff;
+  border: 2px solid #d4deff;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.habit-btn:hover {
+  background: #d4deff;
+  border-color: #0046ff;
+}
+
+.score-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #475569;
+}
+
+.score-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0046ff;
+}
+
+/* ===== SYMPTOM PAGE ===== */
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  border-color: #0046ff;
+}
+
+.result-box {
+  min-height: 24px;
+  padding: 14px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #0046ff;
+  margin-bottom: 24px;
+}
+
+.result-box:empty {
+  display: none;
+}
+
+.symptom-hints {
+  text-align: left;
+}
+
+.symptom-hints h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1e293b;
+}
+
+.hint-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 6px 14px;
+  background: #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.tag:hover {
+  background: #0046ff;
+  color: #fff;
+}
+
+/* ===== MAP PAGE ===== */
+.map-container {
+  margin-top: 20px;
+}
+
+/* ===== CHATBOT PAGE ===== */
+.chatbox {
+  height: 360px;
+  overflow-y: auto;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.chat-message {
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.chat-message.user {
+  background: #0046ff;
+  color: #fff;
+  margin-left: 20%;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-message.bot {
+  background: #e2e8f0;
+  color: #1e293b;
+  margin-right: 20%;
+  border-bottom-left-radius: 2px;
+}
+
+.chat-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input-group input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chat-input-group input:focus {
+  border-color: #0046ff;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* ===== CLINIC SEARCH ===== */
+.clinic-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.clinic-controls label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.clinic-controls select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.clinic-status {
+  margin-bottom: 14px;
+  color: #334155;
+  font-weight: 500;
+  min-height: 1.2em;
+}
+
+.clinic-results {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.clinic-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.clinic-info {
+  max-width: 60%;
+}
+
+.clinic-address,
+.clinic-specialty {
+  font-size: 0.9rem;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.clinic-meta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .hero {
+    padding: 64px 20px 40px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .page-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    padding: 0 8px;
+  }
+
+  .page-content {
+    padding: 24px 16px 48px;
+  }
+
+  .feature-card {
+    padding: 24px 20px;
+  }
+
+  .timer-display {
+    font-size: 2.5rem;
+  }
+
+  .input-group,
+  .chat-input-group {
+    flex-direction: column;
+  }
+
+  .chat-input-group input,
+  .chat-input-group button {
+    width: 100%;
+  }
+
+  .hint-tags {
+    justify-content: center;
+  }
+
+  .clinic-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
