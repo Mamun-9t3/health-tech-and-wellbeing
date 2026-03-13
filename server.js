@@ -11,14 +11,12 @@ const dataFile = path.join(__dirname, 'users.json');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve static assets from the `html` folder (HTML pages) and `css`/`js` folders
-app.use(express.static(path.join(__dirname, 'html')));
-app.use(express.static(path.join(__dirname, 'css')));
-app.use(express.static(path.join(__dirname, 'js')));
+// Serve all static assets (HTML, CSS, JS, images) from the project root
+app.use(express.static(path.join(__dirname)));
 
-// Default route: serve index.html from the html folder
+// Default route: serve index.html from the project root
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'html', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // registration endpoint
