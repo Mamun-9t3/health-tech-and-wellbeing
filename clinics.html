@@ -31,13 +31,15 @@
       </ul>
     </nav>
 
-    <section class="page-hero">
-      <h1>&#128205; Find Hospitals</h1>
-      <p>Locate hospitals and clinics near your current location.</p>
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>📍 Find Hospitals</h1>
+        <p>Locate hospitals and clinics near your current location.</p>
+      </div>
     </section>
 
-    <section class="page-content">
-      <div class="feature-card map-card">
+    <section class="dashboard-cards-container">
+      <div class="dash-card map-card">
         <h2>Nearby Hospitals</h2>
         <p class="subtitle">
           Choose a specialist and we’ll show hospitals near you (with distance).
@@ -46,13 +48,15 @@
         <div class="clinic-controls">
           <label for="specialtySelect">Select specialty</label>
           <select id="specialtySelect">
-            <option value="" disabled selected>Select a specialty</option>
-            <option value="Neurologist">Neurologist</option>
-            <option value="Cardiologist">Cardiologist</option>
-            <option value="Dermatologist">Dermatologist</option>
-            <option value="Ophthalmologist">Ophthalmologist</option>
-            <option value="Pediatrician">Pediatrician</option>
-            <option value="General Physician">General Physician</option>
+            <option value="all">General / All Facilities</option>
+            <option value="cardiac">Cardiac / Heart</option>
+            <option value="neuro">Neurology / Brain</option>
+            <option value="derma">Dermatology / Skin</option>
+            <option value="pediatric">Pediatrics / Children</option>
+            <option value="ortho">Orthopedics / Bones</option>
+            <option value="dental">Dental / Dentist</option>
+            <option value="eye">Ophthalmology / Eye Care</option>
+            <option value="gynae">Gynecology / Women's Health</option>
           </select>
           <button class="btn-primary" onclick="findHospitals()" id="findBtn">
             Find Nearby

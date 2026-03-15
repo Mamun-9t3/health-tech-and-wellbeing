@@ -33,14 +33,54 @@
       </ul>
     </nav>
 
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Your Personal <span class="highlight">Health Companion</span></h1>
-        <p>
-          Smart wellness tracking, AI-powered symptom checking, and instant
-          health guidance — all in one place.
-        </p>
-        <a href="#features" class="btn-primary">Explore Features</a>
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>👋 Welcome Back!</h1>
+        <p>Track your daily health activities and wellness score.</p>
+      </div>
+    </section>
+
+    <section class="dashboard-cards-container">
+      <!-- Overall Wellness -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h3>Overall Wellness</h3>
+          <div class="dash-icon icon-pulse">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+        </div>
+        <div class="dash-card-body">
+          <h2><span id="wellnessScoreDisplay">12</span> <small>/ 100</small></h2>
+          <p class="dash-desc">Based on your recent activity logging.</p>
+        </div>
+      </div>
+
+      <!-- Hydration Today -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h3>Hydration Today</h3>
+          <div class="dash-icon icon-water">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+          </div>
+        </div>
+        <div class="dash-card-body">
+          <h2><span id="hydrationAmountDisplay">0</span> <small>ml</small></h2>
+          <button class="btn-dash-outline" onclick="logHydration()">+ Drink 250ml</button>
+        </div>
+      </div>
+
+      <!-- Active Minutes -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h3>Active Minutes</h3>
+          <div class="dash-icon icon-timer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+        </div>
+        <div class="dash-card-body">
+          <h2><span id="activeMinutesDisplay">0</span> <small>mins</small></h2>
+          <button class="btn-dash-outline" onclick="logActivity()">+ Log 15m Stretch</button>
+        </div>
       </div>
     </section>
 
@@ -89,6 +129,9 @@
     <footer class="footer">
       <p>&copy; 2026 Health Companion. Your health, our priority.</p>
     </footer>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
 
     <script src="js/script.js"></script>
   </body>

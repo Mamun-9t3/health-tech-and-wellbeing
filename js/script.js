@@ -1,341 +1,709 @@
 // ===== Mobile Menu Toggle =====
 function toggleMenu() {
-  var nav = document.getElementById("navLinks");
-  if (nav) nav.classList.toggle("open");
+  var nav = document.getElementById('navLinks');
+  if (nav) nav.classList.toggle('open');
 }
+
+// ===== Navbar: show logged-in user =====
+(function initNavUser() {
+  fetch('/api/me', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : null)
+    .then(user => {
+      var signIn  = document.querySelector('a[href="login.html"].btn-primary');
+      var signUp  = document.querySelector('a[href="register.html"].btn-secondary');
+      var navList = document.getElementById('navLinks');
+
+      if (user && navList) {
+        if (signIn) signIn.parentElement.remove();
+        if (signUp) signUp.parentElement.remove();
+
+        var li = document.createElement('li');
+        li.innerHTML =
+          '<span style="color:#4f9cf9;font-weight:600;padding:8px 12px;">👤 ' + user.username + '</span>';
+        navList.appendChild(li);
+
+        var li2 = document.createElement('li');
+        li2.innerHTML = '<a href="#" class="btn-secondary" id="logoutBtn">Logout</a>';
+        navList.appendChild(li2);
+
+        document.addEventListener('click', function (e) {
+          if (e.target && e.target.id === 'logoutBtn') {
+            e.preventDefault();
+            fetch('/api/logout', { method: 'POST', credentials: 'include' })
+              .then(() => window.location.href = 'login.html');
+          }
+        });
+      }
+    })
+    .catch(() => {});
+})();
 
 // ===== Wellness Timer =====
-var score = 0;
-var time = 1500;
-var total = 1500;
-var timerInterval = null;
-var timerRunning = false;
+let timerMode = 'focus';
+let time = 1500;
+let total = 1500;
+let timerInterval = null;
+let timerRunning = false;
+let sessionStartTime = null;
 
-function addScore() {
-  score += 10;
-  var el = document.getElementById("score");
-  if (el) el.innerText = score;
-}
-
-function updateTimerDisplay() {
-  var m = Math.floor(time / 60);
-  var s = time % 60;
-  var display = m + ":" + (s < 10 ? "0" : "") + s;
-  var el = document.getElementById("time");
-  if (el) el.innerText = display;
-  var bar = document.getElementById("progress");
-  if (bar) bar.style.width = ((total - time) / total) * 100 + "%";
-}
-
-function startTimer() {
-  if (timerRunning) return;
-  timerRunning = true;
-  timerInterval = setInterval(function () {
-    time--;
-    updateTimerDisplay();
-    if (time <= 0) {
-      clearInterval(timerInterval);
-      timerRunning = false;
-      alert("Take a wellness break!");
-      resetTimer();
-    }
-  }, 1000);
-}
-
-function pauseTimer() {
-  clearInterval(timerInterval);
-  timerRunning = false;
-}
-
-function resetTimer() {
-  clearInterval(timerInterval);
-  timerRunning = false;
-  time = total;
+function setTimerMode(mode) {
+  if (timerRunning) return; // Prevent changing mode while running
+  timerMode = mode;
+  
+  // Toggle UI buttons
+  const focusBtn = document.getElementById('focusToggle');
+  const breakBtn = document.getElementById('breakToggle');
+  if (focusBtn) focusBtn.classList.remove('active');
+  if (breakBtn) breakBtn.classList.remove('active');
+  
+  if (mode === 'focus') {
+    if (focusBtn) focusBtn.classList.add('active');
+    time = 1500;
+    total = 1500;
+  } else {
+    if (breakBtn) breakBtn.classList.add('active');
+    time = 300;
+    total = 300;
+  }
   updateTimerDisplay();
 }
 
-// ===== Symptom Checker =====
+function updateTimerDisplay() {
+  let m = Math.floor(time / 60);
+  let s = time % 60;
+  let display = m + ':' + (s < 10 ? '0' : '') + s;
+  let el = document.getElementById('time');
+  if (el) el.innerText = display;
+}
+
+function toggleTimer() {
+  let btn = document.getElementById('startBtn');
+  if (timerRunning) {
+    // Pause
+    clearInterval(timerInterval);
+    timerRunning = false;
+    if (btn) btn.innerText = 'START';
+  } else {
+    // Start
+    timerRunning = true;
+    sessionStartTime = Date.now();
+    if (btn) btn.innerText = 'PAUSE';
+    
+    timerInterval = setInterval(function () {
+      time--;
+      updateTimerDisplay();
+      if (time <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        if (btn) btn.innerText = 'START';
+        
+        let elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+        logWellnessSession(elapsed, true);
+        
+        if (timerMode === 'focus') {
+          showToast('Focus session complete!', 'success');
+          // Automatically log the completed session
+          if (typeof logFocusSession === 'function') logFocusSession();
+        } else {
+          showToast('Break complete! Back to work.', 'info');
+        }
+        
+        // Auto-switch modes
+        setTimerMode(timerMode === 'focus' ? 'break' : 'focus');
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  if (timerRunning && sessionStartTime) {
+    let elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+    if (elapsed > 10) logWellnessSession(elapsed, false);
+  }
+  clearInterval(timerInterval);
+  timerRunning = false;
+  sessionStartTime = null;
+  time = total;
+  updateTimerDisplay();
+  
+  let btn = document.getElementById('startBtn');
+  if (btn) btn.innerText = 'START';
+}
+
+function logWellnessSession(duration_seconds, completed) {
+  fetch('/api/wellness/log', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ duration_seconds, completed }),
+  }).catch(() => {});
+}
+
+// ===== Symptom Checker (Gemini-powered) =====
+
+/** Convert markdown to HTML for AI replies */
+function markdownToHtml(text) {
+  // Escape raw HTML first (XSS protection)
+  var safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  return safe
+    // Bold+Italic: ***text***
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold: **text**
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic: *text* (single asterisk, NOT followed by space = not a bullet)
+    .replace(/\*(?! )(.+?)(?<! )\*/g, '<em>$1</em>')
+    // Bullet lines: only "- item" (dash-space) to avoid clashing with *italic*
+    .replace(/^[ \t]*- (.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive <li> runs in a single <ul>
+    .replace(/(<li>.*<\/li>)(\n<li>.*<\/li>)*/g, (m) =>
+      '<ul style="margin:8px 0 8px 18px;padding:0;list-style:disc;">' + m + '</ul>'
+    )
+    // Remove seams between adjacent </ul><ul>
+    .replace(/<\/ul>\n?<ul[^>]*>/g, '')
+    // Remaining newlines → line breaks
+    .replace(/\n/g, '<br>');
+}
+
+
 function checkSymptom() {
-  var s = document.getElementById("symptom").value.toLowerCase();
-  var r = "";
-  if (s.includes("fever") || s.includes("cough"))
-    r = "You should consult a General Physician.";
-  else if (s.includes("skin") || s.includes("rash"))
-    r = "You should consult a Dermatologist.";
-  else if (s.includes("eye"))
-    r = "You should consult an Ophthalmologist.";
-  else if (s.includes("headache") || s.includes("head"))
-    r = "You should consult a Neurologist.";
-  else if (s.includes("stomach") || s.includes("digestion"))
-    r = "You should consult a Gastroenterologist.";
-  else if (s.trim() === "")
-    r = "Please enter your symptoms first.";
-  else
-    r = "Consult a General Physician for further evaluation.";
-  document.getElementById("result").innerText = r;
+  var inputEl  = document.getElementById('symptom');
+  var resultEl = document.getElementById('result');
+  var cardEl   = document.getElementById('resultCard');
+  var symptom  = inputEl ? inputEl.value.trim() : '';
+
+  if (!symptom) {
+    if (resultEl) resultEl.innerText = 'Please enter your symptoms first.';
+    if (cardEl)   cardEl.style.display = 'block';
+    return;
+  }
+
+  if (resultEl) resultEl.innerHTML = '<em style="color:#6b7280;">🔍 Analysing your symptoms...</em>';
+  if (cardEl)   cardEl.style.display = 'block';
+
+  fetch('/api/symptoms/check', {
+    method:      'POST',
+    credentials: 'include',
+    headers:     { 'Content-Type': 'application/json' },
+    body:        JSON.stringify({ symptom }),
+  })
+    .then(r => r.json())
+    .then(data => {
+      var text = data.recommendation || data.error || 'Unable to analyse symptoms.';
+      if (resultEl) resultEl.innerHTML = markdownToHtml(text);
+    })
+    .catch(() => {
+      if (resultEl) resultEl.innerHTML = markdownToHtml(localSymptomCheck(symptom));
+    });
+}
+
+function localSymptomCheck(s) {
+  var lower = s.toLowerCase();
+  if (lower.includes('fever') || lower.includes('cough'))  return 'Consult a General Physician.';
+  if (lower.includes('skin')  || lower.includes('rash'))   return 'Consult a Dermatologist.';
+  if (lower.includes('eye'))                               return 'Consult an Ophthalmologist.';
+  if (lower.includes('headache') || lower.includes('head')) return 'Consult a Neurologist.';
+  if (lower.includes('stomach') || lower.includes('digestion')) return 'Consult a Gastroenterologist.';
+  return 'Consult a General Physician for further evaluation.';
 }
 
 function fillSymptom(text) {
-  var input = document.getElementById("symptom");
-  if (input) {
-    input.value = text;
-    // Do not auto-run the checker when filling a suggestion.
-    // The user must press "Check" to see which specialist to consult.
-  }
+  var input = document.getElementById('symptom');
+  if (input) input.value = text;
 }
 
 // ===== Hospital Map =====
 function showMap() {
-  var map = document.getElementById("map");
+  var map = document.getElementById('map');
   if (map) {
-    map.style.display = "block";
-    var btn = document.getElementById("mapBtn");
-    if (btn) btn.style.display = "none";
+    map.style.display = 'block';
+    var btn = document.getElementById('mapBtn');
+    if (btn) btn.style.display = 'none';
   }
 }
 
-// ===== Chatbot =====
+// ===== Chatbot (Gemini-powered) with session sidebar =====
+var chatHistory   = [];   // [{role:'user'|'model', parts:[{text}]}]
+var currentSessionId = generateSessionId();
+
+function generateSessionId() {
+  return 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
 function fillChatSymptom(text) {
-  var input = document.getElementById("userInput");
-  if (input) {
-    input.value = text;
-    input.focus();
-  }
+  var input = document.getElementById('userInput');
+  if (input) { input.value = text; input.focus(); }
 }
 
-function chat() {
-  var inputEl = document.getElementById("userInput");
-  var input = inputEl.value.trim();
-  if (!input) return;
-
-  var chatbox = document.getElementById("chatbox");
-  chatbox.innerHTML +=
-    '<div class="chat-message user"><strong>You:</strong> ' + input + "</div>";
-
-  var lower = input.toLowerCase();
-  var reply = "";
-
-  if (lower.includes("fever") || lower.includes("chills")) {
-    reply =
-      "A fever can mean your body is fighting an infection. Stay hydrated, rest, and use a fever reducer like paracetamol/acetaminophen as needed. If it stays above 102°F (39°C) or lasts more than a couple of days, please see a doctor.";
-  } else if (lower.includes("cough")) {
-    reply =
-      "A cough can come from a cold, flu, or irritation. Try warm fluids, honey, and throat lozenges. If it lasts more than a week, you cough up blood, or you have trouble breathing, consult a physician.";
-  } else if (lower.includes("headache")) {
-    reply =
-      "Headaches are common and can be caused by stress, dehydration, or lack of sleep. Rest, drink water, and consider an over-the-counter pain reliever. If it’s sudden and severe or comes with vision changes, seek medical attention.";
-  } else if (lower.includes("stomach") || lower.includes("nausea")) {
-    reply =
-      "Stomach discomfort can be from indigestion, a virus, or food sensitivity. Try clear fluids, bland foods, and avoid fatty or spicy meals. If you have severe pain, blood in vomit/stool, or ongoing nausea, see a provider.";
-  } else if (lower.includes("skin") || lower.includes("rash")) {
-    reply =
-      "Skin rashes can be due to allergies, irritation, or infection. Keep the area clean and avoid new products. If it spreads quickly, becomes painful, or you develop swelling, get evaluated by a dermatologist.";
-  } else if (lower.includes("eye")) {
-    reply =
-      "Eye irritation could be from dryness, allergies, or infection. Avoid rubbing, use artificial tears, and see an eye doctor if you have pain, vision changes, or discharge.";
-  } else {
-    reply =
-      "That sounds uncomfortable. Try to rest, stay hydrated, and monitor symptoms. If you feel worse or are unsure, please consult a healthcare professional.";
+// ── Start a fresh chat ──────────────────────────────────────────────
+function startNewChat() {
+  currentSessionId = generateSessionId();
+  chatHistory = [];
+  var chatbox = document.getElementById('chatbox');
+  if (chatbox) {
+    chatbox.innerHTML =
+      '<div class="chat-message bot"><strong>Doctor AI</strong>Hello! Describe your symptoms and I\'ll try to help.</div>';
   }
-
-  // show typing indicator for 5 seconds before replying
-  chatbox.innerHTML +=
-    '<div class="chat-message bot" id="typingIndicator"><strong>Doctor AI:</strong> Typing...</div>';
-  chatbox.scrollTop = chatbox.scrollHeight;
-
-  inputEl.value = "";
-  inputEl.disabled = true;
-
-  setTimeout(function () {
-    var typingEl = document.getElementById("typingIndicator");
-    if (typingEl) typingEl.remove();
-
-    chatbox.innerHTML +=
-      '<div class="chat-message bot"><strong>Doctor AI:</strong> ' + reply + "</div>";
-    chatbox.scrollTop = chatbox.scrollHeight;
-    inputEl.disabled = false;
-    inputEl.focus();
-  }, 5000);
+  // Deselect sidebar items
+  document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
 }
 
-// ===== Clinics / Doctor Search =====
+// ── Load sidebar session list ───────────────────────────────────────
+function loadSessionList() {
+  fetch('/api/chat/sessions', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : [])
+    .then(sessions => {
+      var list = document.getElementById('sessionList');
+      if (!list) return;
 
-const clinicData = [
-  {
-    name: "City General Hospital",
-    address: "123 Main St",
-    lat: 40.7128,
-    lng: -74.006,
-    specialties: ["General Physician", "Cardiologist", "Neurologist"],
-  },
-  {
-    name: "Northside Medical Center",
-    address: "450 Maple Ave",
-    lat: 40.7215,
-    lng: -74.0012,
-    specialties: ["Dermatologist", "Pediatrician", "Ophthalmologist"],
-  },
-  {
-    name: "Riverfront Wellness Clinic",
-    address: "320 River Rd",
-    lat: 40.7001,
-    lng: -74.0142,
-    specialties: ["General Physician", "Pediatrician"],
-  },
-  {
-    name: "Downtown Neurology Center",
-    address: "210 Health Plaza",
-    lat: 40.7292,
-    lng: -73.9965,
-    specialties: ["Neurologist"],
-  },
-  {
-    name: "EyeCare Specialists",
-    address: "88 Vision Blvd",
-    lat: 40.7182,
-    lng: -74.0092,
-    specialties: ["Ophthalmologist"],
-  },
-  {
-    name: "West End Pediatrics",
-    address: "14 West St",
-    lat: 40.7139,
-    lng: -74.0124,
-    specialties: ["Pediatrician", "General Physician"],
-  },
-  {
-    name: "Harbor Cardio Institute",
-    address: "786 Harbor Dr",
-    lat: 40.7223,
-    lng: -74.0021,
-    specialties: ["Cardiologist"],
-  },
-  {
-    name: "Skin & Derm Care",
-    address: "502 Madison Ave",
-    lat: 40.7556,
-    lng: -73.9808,
-    specialties: ["Dermatologist"],
-  },
-  {
-    name: "Vision Point Clinic",
-    address: "220 Park Ave",
-    lat: 40.7484,
-    lng: -73.9857,
-    specialties: ["Ophthalmologist"],
-  },
-  {
-    name: "Family Health Partners",
-    address: "95 Brook Lane",
-    lat: 40.7301,
-    lng: -73.9957,
-    specialties: ["General Physician", "Pediatrician"],
-  },
-  {
-    name: "NeuroCare Center",
-    address: "121 Central Blvd",
-    lat: 40.7327,
-    lng: -73.9840,
-    specialties: ["Neurologist"],
-  },
-];
-
-function toMiles(km) {
-  return km * 0.621371;
-}
-
-function getDistanceKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function findHospitals() {
-  const status = document.getElementById("clinicsStatus");
-  const results = document.getElementById("clinicResults");
-  const specialty = document.getElementById("specialtySelect").value;
-
-  if (!specialty) {
-    status.textContent = "Please select a specialty to continue.";
-    results.innerHTML = "";
-    return;
-  }
-
-  if (!navigator.geolocation) {
-    status.textContent =
-      "Your browser doesn't support location access. Please enable location services.";
-    results.innerHTML = "";
-    return;
-  }
-
-  status.textContent = "Locating you...";
-  results.innerHTML = "";
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const { latitude, longitude } = position.coords;
-      status.textContent = "Finding nearby providers...";
-
-      const matches = clinicData
-        .filter((clinic) => clinic.specialties.includes(specialty))
-        .map((clinic) => {
-          const km = getDistanceKm(
-            latitude,
-            longitude,
-            clinic.lat,
-            clinic.lng
-          );
-          return { ...clinic, distance: toMiles(km) };
-        })
-        .sort((a, b) => a.distance - b.distance);
-
-      if (matches.length === 0) {
-        status.textContent =
-          "No hospitals found for that specialty in our demo data.";
+      if (!sessions || sessions.length === 0) {
+        list.innerHTML = '<span style="color:#cbd5e1;font-size:0.82rem;padding:4px;">No conversations yet</span>';
         return;
       }
 
-      status.textContent = `Showing ${matches.length} results (sorted by closest).`;
-      results.innerHTML = matches
-        .map(
-          (clinic) =>
-            `<div class="clinic-card">
-              <div class="clinic-info">
-                <strong>${clinic.name}</strong>
-                <div class="clinic-address">${clinic.address}</div>
-                <div class="clinic-specialty">Specialty: ${specialty}</div>
-              </div>
-              <div class="clinic-meta">
-                <div>${clinic.distance.toFixed(1)} mi</div>
-                <a class="btn-secondary" target="_blank" rel="noopener"
-                  href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    clinic.name
-                  )}&query_place_id=&center=${clinic.lat},${clinic.lng}">
-                  Open in Maps
-                </a>
-              </div>
-            </div>`
-        )
-        .join("");
+      list.innerHTML = sessions.map(s => {
+        var preview = (s.first_message || '').slice(0, 28) + (s.first_message && s.first_message.length > 28 ? '...' : '');
+        return `<div class="session-item" data-id="${s.session_id}" onclick="loadSession('${s.session_id}', this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          ${escapeHtml(preview)}
+        </div>`;
+      }).join('');
+    })
+    .catch(() => {});
+}
+
+// ── Load a past session into the chatbox ────────────────────────────
+function loadSession(sessionId, el) {
+  currentSessionId = sessionId;
+  chatHistory = [];
+
+  document.querySelectorAll('.session-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  fetch('/api/chat/session/' + sessionId, { credentials: 'include' })
+    .then(r => r.json())
+    .then(messages => {
+      var chatbox = document.getElementById('chatbox');
+      if (!chatbox) return;
+
+      if (!messages || messages.length === 0) {
+        chatbox.innerHTML = '<div class="chat-message bot"><strong>Doctor AI</strong>No messages in this session.</div>';
+        return;
+      }
+
+      chatbox.innerHTML = messages.map(m => {
+        if (m.role === 'user') {
+          chatHistory.push({ role: 'user',  parts: [{ text: m.message }] });
+          return `<div class="chat-message user"><strong>You</strong>${escapeHtml(m.message)}</div>`;
+        } else {
+          chatHistory.push({ role: 'model', parts: [{ text: m.message }] });
+          return `<div class="chat-message bot"><strong>Doctor AI</strong>${markdownToHtml(m.message)}</div>`;
+        }
+      }).join('');
+      chatbox.scrollTop = chatbox.scrollHeight;
+    })
+    .catch(() => {});
+}
+
+// ── Send a message ──────────────────────────────────────────────────
+function chat() {
+  var inputEl = document.getElementById('userInput');
+  var sendBtn = document.getElementById('sendBtn');
+  var input   = inputEl ? inputEl.value.trim() : '';
+  if (!input) return;
+
+  var chatbox = document.getElementById('chatbox');
+  chatbox.innerHTML += `<div class="chat-message user"><strong>You</strong>${escapeHtml(input)}</div>`;
+  chatbox.innerHTML += `<div class="chat-message bot" id="typingIndicator"><strong>Doctor AI</strong><em>Typing...</em></div>`;
+  chatbox.scrollTop  = chatbox.scrollHeight;
+
+  inputEl.value    = '';
+  inputEl.disabled = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  fetch('/api/chat/save', {
+    method:      'POST',
+    credentials: 'include',
+    headers:     { 'Content-Type': 'application/json' },
+    body:        JSON.stringify({ message: input, history: chatHistory, session_id: currentSessionId }),
+  })
+    .then(r => r.json())
+    .then(data => {
+      var typingEl = document.getElementById('typingIndicator');
+      if (typingEl) typingEl.remove();
+
+      if (data.error) {
+        // Just display error without appending it to the real history
+        chatbox.innerHTML += `<div class="chat-message bot"><strong>Doctor AI</strong><span style="color:#ef4444;">${escapeHtml(data.error)}</span></div>`;
+      } else {
+        var reply = data.reply || 'Sorry, I could not respond.';
+        chatHistory.push({ role: 'user',  parts: [{ text: input }] });
+        chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+        chatbox.innerHTML += `<div class="chat-message bot"><strong>Doctor AI</strong>${markdownToHtml(reply)}</div>`;
+        
+        // Urgent local check
+        var urgent = getUrgentAdvice(input);
+        if (urgent) {
+           displayBotSuggestion(urgent, null, []);
+        }
+
+        // Doctor specialty check & hospital fetching
+        var doctor = getDoctorSpecialty(input);
+        if (doctor !== 'General Physician' || input.toLowerCase().includes('doctor') || input.toLowerCase().includes('hospital')) {
+          var suggestionText = `Based on what you described, it may be helpful to consult a ${doctor}. Detecting nearby facilities...`;
+          var loadingId = 'loading-' + Date.now();
+          chatbox.innerHTML += `<div class="chat-message bot" id="${loadingId}"><strong>Doctor AI (Action)</strong><div style="background:#f1f5f9; border-radius:8px; padding:10px; margin-top:8px; font-size:0.9rem; color:#475569;">${suggestionText}</div></div>`;
+          chatbox.scrollTop = chatbox.scrollHeight;
+
+          getNearestHospitalDataForChat(doctor).then(res => {
+            var el = document.getElementById(loadingId);
+            if (el) el.remove();
+            displayBotSuggestion(`I found some nearby facilities that might help you connect with a ${doctor}:`, res.mapLink, res.hospitals);
+          });
+        }
+
+        // Refresh sidebar after first message of a session
+        if (chatHistory.length === 2) loadSessionList();
+      }
+
+      chatbox.scrollTop  = chatbox.scrollHeight;
+      inputEl.disabled   = false;
+      if (sendBtn) sendBtn.disabled = false;
+      inputEl.focus();
+    })
+    .catch(() => {
+      var typingEl = document.getElementById('typingIndicator');
+      if (typingEl) typingEl.remove();
+      chatbox.innerHTML += `<div class="chat-message bot"><strong>Doctor AI</strong><span style="color:#ef4444;">Unable to connect. Please ensure you are logged in.</span></div>`;
+      chatbox.scrollTop  = chatbox.scrollHeight;
+      inputEl.disabled   = false;
+      if (sendBtn) sendBtn.disabled = false;
+    });
+}
+
+
+
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\n/g, '<br>');
+}
+
+// Allow Enter key to send chat
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'userInput') {
+    e.preventDefault();
+    chat();
+  }
+});
+
+// ===== Clinics / Doctor Search — client-side filtered =====
+var allHospitals = [];   // cache all fetched hospitals
+var userLatLon   = null; // { lat, lon }
+
+function filterAndRender() {
+  const specialty = document.getElementById('specialtySelect')
+    ? document.getElementById('specialtySelect').value
+    : 'all';
+  const status  = document.getElementById('clinicsStatus');
+  const results = document.getElementById('clinicResults');
+
+  const filtered = allHospitals.filter(h => {
+    if (specialty === 'all') return true;
+    const t = h.specialtyTags || '';
+    if (specialty === 'cardiac')   return t.includes('cardi') || t.includes('heart');
+    if (specialty === 'neuro')     return t.includes('neuro') || t.includes('brain');
+    if (specialty === 'derma')     return t.includes('derma') || t.includes('skin');
+    if (specialty === 'pediatric') return t.includes('pediatr') || t.includes('paediatr') || t.includes('child') || t.includes('shishu');
+    if (specialty === 'ortho')     return t.includes('ortho') || t.includes('bone');
+    if (specialty === 'dental')    return t.includes('dent') || t.includes('tooth') || t.includes('teeth');
+    if (specialty === 'eye')       return t.includes('eye') || t.includes('ophthal') || t.includes('vision');
+    if (specialty === 'gynae')     return t.includes('gyn') || t.includes('women') || t.includes('matern');
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    if (status) status.textContent = allHospitals.length > 0
+      ? 'No facilities found for this specialty within 10 km. Try "General / All Facilities".'
+      : 'No hospitals found near you.';
+    if (results) results.innerHTML = '';
+    return;
+  }
+
+  if (status) status.textContent =
+    `Showing ${filtered.length} result${filtered.length > 1 ? 's' : ''} near you (sorted by closest).`;
+
+  if (results) {
+    results.innerHTML = filtered.map(p => {
+      const mapsDir = userLatLon
+        ? `https://www.google.com/maps/dir/?api=1&origin=${userLatLon.lat},${userLatLon.lon}&destination=${p.lat},${p.lon}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}`;
+      return `
+        <div class="clinic-card">
+          <div class="clinic-info">
+            <strong>${escapeHtml(p.name)}</strong>
+            <div class="clinic-address">${p.address ? escapeHtml(p.address) : 'Address not available'}</div>
+            <div class="clinic-specialty">${escapeHtml((p.type || 'clinic').replace('_',' '))} — ${p.dist.toFixed(1)} km away</div>
+          </div>
+          <div class="clinic-meta">
+            <a class="btn-primary" target="_blank" rel="noopener" href="${mapsDir}"
+               style="font-size:0.85rem;padding:10px 16px;">
+              🗺️ Get Directions
+            </a>
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function findHospitals() {
+  const status  = document.getElementById('clinicsStatus');
+  const results = document.getElementById('clinicResults');
+
+  if (!navigator.geolocation) {
+    if (status) status.textContent = "Your browser doesn't support location access.";
+    return;
+  }
+
+  if (status) status.innerHTML = '📍 Locating you...';
+  if (results) results.innerHTML = '';
+  allHospitals = [];
+
+  navigator.geolocation.getCurrentPosition(
+    async position => {
+      userLatLon = { lat: position.coords.latitude, lon: position.coords.longitude };
+      if (status) status.innerHTML = '🔍 Searching nearby hospitals...';
+
+      try {
+        const params = new URLSearchParams({ lat: userLatLon.lat, lon: userLatLon.lon });
+        const resp   = await fetch('/api/hospitals?' + params);
+        const data   = await resp.json();
+
+        if (!resp.ok) {
+          if (status) status.textContent = data.error || 'Failed to load hospital data.';
+          return;
+        }
+
+        allHospitals = data;
+        filterAndRender();
+      } catch (err) {
+        console.error('Hospital fetch error:', err);
+        if (status) status.textContent = 'Failed to load data. Check your connection and try again.';
+      }
     },
-    (err) => {
-      status.textContent =
-        "Unable to access location. Please allow location access and try again.";
-      results.innerHTML = "";
+    () => {
+      if (status) status.textContent = 'Location access denied. Please allow location access and try again.';
     },
-    { timeout: 10000 }
+    { timeout: 12000, enableHighAccuracy: true }
   );
 }
 
-// Automatically run when Clinics page loads
-if (document.getElementById("specialtySelect")) {
-  findHospitals();
+// Re-filter instantly when dropdown changes (no new API call)
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.id === 'specialtySelect' && allHospitals.length > 0) {
+    filterAndRender();
+  }
+});
+
+// ===== Inline Chat Helpers (Reference code integration) =====
+
+function getDoctorSpecialty(input) {
+  var text = input.toLowerCase();
+  if (text.includes("fever") || text.includes("cough") || text.includes("cold") || text.includes("flu")) return "General Physician";
+  if (text.includes("skin") || text.includes("rash") || text.includes("acne")) return "Dermatologist";
+  if (text.includes("eye") || text.includes("vision") || text.includes("blur")) return "Ophthalmologist";
+  if (text.includes("headache") || text.includes("migraine")) return "Neurologist";
+  if (text.includes("stomach") || text.includes("nausea") || text.includes("diarrhea") || text.includes("digest")) return "Gastroenterologist";
+  if (text.includes("chest") || text.includes("heart") || text.includes("palpitations") || text.includes("breath")) return "Cardiologist";
+  if (text.includes("bone") || text.includes("joint") || text.includes("muscle") || text.includes("fracture")) return "Orthopedist";
+  return "General Physician";
 }
+
+function getUrgentAdvice(input) {
+  var text = input.toLowerCase();
+  var severeKeywords = ["severe", "worsening", "intense", "very bad", "can't breathe", "shortness of breath", "chest pain", "blood", "unconscious", "confusion", "stroke"];
+  var found = severeKeywords.some((kw) => text.includes(kw));
+  if (found) {
+    return "If your pain is severe or symptoms are rapidly worsening, please call emergency services right away.";
+  }
+  return null;
+}
+
+function displayBotSuggestion(text, mapLink, hospitals) {
+  var chatbox = document.getElementById('chatbox');
+  if (!chatbox) return;
+
+  var isEmergency = text.toLowerCase().includes("call") && text.toLowerCase().includes("emergency");
+  var styleAttr = isEmergency 
+    ? ' style="border:1.5px solid rgba(239, 68, 68, 0.5); background:rgba(254, 242, 242, 0.8); border-radius:8px; padding:12px; margin-top:8px; color:#991b1b;"' 
+    : ' style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-top:8px; color:#334155; font-size:0.95rem;"';
+  
+  var html = '<div class="chat-message bot"><strong>Doctor AI (Action)</strong><div' + styleAttr + '><p style="margin:0 0 8px 0; font-weight:500;">' + escapeHtml(text) + '</p>';
+  
+  if (hospitals && hospitals.length > 0) {
+    html += '<ul style="margin:0; padding-left:22px; font-size:0.85rem; line-height:1.6;">';
+    hospitals.forEach(function(h, index) {
+      var gmapsLink = 'https://www.google.com/maps/dir/?api=1&destination=' + h.lat + ',' + h.lon;
+      html += '<li style="margin-bottom:6px;"><a href="' + gmapsLink + '" target="_blank" rel="noopener noreferrer" style="color:#0ea5e9; text-decoration:none; font-weight:600;">' + escapeHtml(h.name) + '</a><span style="display:block; font-size:0.75rem; color:#64748b;">' + (index === 0 ? '<strong style="color:#10b981;">(Closest)</strong> ' : '') + h.dist.toFixed(1) + ' km away</span></li>';
+    });
+    html += '</ul>';
+  } else if (mapLink && !isEmergency) {
+    html += '<div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">Finding specific local clinics nearby...</div>';
+  }
+  
+  if (mapLink) {
+    html += '<a href="' + mapLink + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:8px; font-size:0.85rem; color:#2563eb; font-weight:600; background:#f1f5f9; padding:6px 10px; border-radius:6px; text-decoration:none;">🌍 View all on Google Maps</a>';
+  }
+  
+  html += '</div></div>';
+  chatbox.innerHTML += html;
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+async function getNearestHospitalDataForChat(doctorSpecialty) {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ mapLink: "https://www.google.com/maps/search/hospital+near+me", hospitals: [] });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
+      var mapLink = 'https://www.google.com/maps/search/' + encodeURIComponent(doctorSpecialty + ' hospital near me') + '/@' + lat + ',' + lon + ',14z';
+      try {
+        var resp = await fetch('/api/hospitals?lat=' + lat + '&lon=' + lon);
+        if (!resp.ok) return resolve({ mapLink: mapLink, hospitals: [] });
+        var data = await resp.json();
+        
+        var filtered = data;
+        var s = doctorSpecialty.toLowerCase();
+        if (s.includes('cardio')) filtered = data.filter(h => (h.specialtyTags||'').includes('cardi') || (h.specialtyTags||'').includes('heart'));
+        else if (s.includes('neuro')) filtered = data.filter(h => (h.specialtyTags||'').includes('neuro') || (h.specialtyTags||'').includes('brain'));
+        else if (s.includes('derma')) filtered = data.filter(h => (h.specialtyTags||'').includes('derma') || (h.specialtyTags||'').includes('skin'));
+        else if (s.includes('ophthal')) filtered = data.filter(h => (h.specialtyTags||'').includes('eye') || (h.specialtyTags||'').includes('ophthal'));
+        else if (s.includes('gastro')) filtered = data.filter(h => (h.specialtyTags||'').includes('gastro') || (h.specialtyTags||'').includes('digest') || (h.specialtyTags||'').includes('stomach'));
+        else if (s.includes('ortho')) filtered = data.filter(h => (h.specialtyTags||'').includes('ortho') || (h.specialtyTags||'').includes('bone'));
+        
+        resolve({ mapLink: mapLink, hospitals: filtered.slice(0, 3) });
+      } catch(e) {
+        resolve({ mapLink: mapLink, hospitals: [] });
+      }
+    }, () => {
+      resolve({ mapLink: "https://www.google.com/maps/search/hospital+near+me", hospitals: [] });
+    }, { timeout: 6000 });
+  });
+}
+
+// Note: findHospitals() is triggered manually by the Find Nearby button only
+// ===== Homepage Dashboard Logging & Toasts =====
+let dashboardState = JSON.parse(localStorage.getItem('hc_dashboardState')) || {
+  wellness: 12,
+  hydration: 0,
+  activeMins: 0,
+  focusMins: 0
+};
+
+async function loadDashboardState() {
+  try {
+    const res = await fetch('/api/dashboard', { credentials: 'include' });
+    if (res.ok) {
+      dashboardState = await res.json();
+      localStorage.setItem('hc_dashboardState', JSON.stringify(dashboardState));
+      updateDashboardDisplay();
+    }
+  } catch (err) {}
+}
+
+async function saveDashboardState() {
+  localStorage.setItem('hc_dashboardState', JSON.stringify(dashboardState));
+  try {
+    await fetch('/api/dashboard', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dashboardState)
+    });
+  } catch (err) {}
+}
+
+function updateDashboardDisplay() {
+  // Homepage displays
+  const w = document.getElementById('wellnessScoreDisplay');
+  const h = document.getElementById('hydrationAmountDisplay');
+  const a = document.getElementById('activeMinutesDisplay');
+  if (w) w.innerText = dashboardState.wellness;
+  if (h) h.innerText = dashboardState.hydration;
+  if (a) a.innerText = dashboardState.activeMins;
+  
+  // Wellness page quick logs
+  const qlH = document.getElementById('qlHydrationStatus');
+  const qlS = document.getElementById('qlStretchStatus');
+  const qlF = document.getElementById('qlFocusStatus');
+  if (qlH) qlH.innerText = 'Today: ' + dashboardState.hydration + ' ml';
+  if (qlS) qlS.innerText = 'Today: ' + dashboardState.activeMins + ' mins';
+  if (qlF) qlF.innerText = 'Today: ' + dashboardState.focusMins + ' mins';
+}
+
+function showToast(message, type = 'success') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  let icon = type === 'success' ? '✅' : 'ℹ️';
+  toast.innerHTML = `<span>${icon} ${message}</span>`;
+  
+  container.appendChild(toast);
+
+  // Remove toast after animation finishes (3s total: 0.3s in + 2.7s out)
+  setTimeout(() => {
+    if (container.contains(toast)) {
+      container.removeChild(toast);
+    }
+  }, 3000);
+}
+
+function logHydration() {
+  dashboardState.hydration += 250;
+  dashboardState.wellness += 2;
+  if (dashboardState.wellness > 100) dashboardState.wellness = 100;
+  saveDashboardState();
+  updateDashboardDisplay();
+  showToast('Logged 250ml of water!', 'info');
+}
+
+function logActivity() {
+  dashboardState.activeMins += 15;
+  dashboardState.wellness += 5;
+  if (dashboardState.wellness > 100) dashboardState.wellness = 100;
+  saveDashboardState();
+  updateDashboardDisplay();
+  showToast('Logged 15m stretch session!', 'success');
+}
+
+function logFocusSession() {
+  dashboardState.focusMins += 25;
+  dashboardState.wellness += 10;
+  if (dashboardState.wellness > 100) dashboardState.wellness = 100;
+  saveDashboardState();
+  updateDashboardDisplay();
+  showToast('Logged 25m Focus Session!', 'success');
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  updateDashboardDisplay();
+  loadDashboardState();
+});

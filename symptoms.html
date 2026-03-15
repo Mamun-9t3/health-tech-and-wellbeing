@@ -31,13 +31,15 @@
       </ul>
     </nav>
 
-    <section class="page-hero">
-      <h1>&#129504; Symptom Checker</h1>
-      <p>Describe your symptoms and find out which specialist to consult.</p>
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>🧠 Symptom Checker</h1>
+        <p>Describe your symptoms and find out which specialist to consult.</p>
+      </div>
     </section>
 
-    <section class="page-content">
-      <div class="feature-card symptom-card">
+    <section class="dashboard-cards-container">
+      <div class="dash-card symptom-card">
         <h2>What are you feeling?</h2>
         <div class="input-group">
           <input
@@ -47,7 +49,13 @@
           />
           <button class="btn-primary" onclick="checkSymptom()">Check</button>
         </div>
-        <div id="result" class="result-box"></div>
+        <div id="resultCard" style="display:none; margin-top:20px; background:#fff; border-radius:12px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #e8f4fd;">
+          <h3 style="color:#0ea5e9; font-size:1rem; font-weight:600; margin:0 0 12px; display:flex; align-items:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            AI Analysis
+          </h3>
+          <div id="result" style="font-size:0.95rem; line-height:1.7; color:#374151;"></div>
+        </div>
 
         <div class="symptom-hints">
           <h3>Common Symptoms</h3>

@@ -25,36 +25,65 @@
       </ul>
     </nav>
 
-    <section class="page-hero">
-      <h1>&#127807; Wellness Timer</h1>
-      <p>Stay productive and healthy with focused work sessions and wellness habits.</p>
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>🌿 Wellness Tracker</h1>
+        <p>Boost productivity with the Pomodoro technique and track healthy habits.</p>
+      </div>
     </section>
 
-    <section class="page-content">
-      <div class="feature-card">
-        <h2>Focus Session</h2>
-        <div class="timer-display" id="time">25:00</div>
-        <div class="progress-bar">
-          <div id="progress"></div>
+    <section class="dashboard-cards-container">
+      <!-- Pomodoro Timer Card -->
+      <div class="dash-card wellness-timer-card">
+        <div class="timer-toggle-group">
+          <button class="timer-toggle-btn active" onclick="setTimerMode('focus')" id="focusToggle">Focus</button>
+          <button class="timer-toggle-btn" onclick="setTimerMode('break')" id="breakToggle">Short Break</button>
         </div>
-        <div class="timer-controls">
-          <button class="btn-primary" onclick="startTimer()">Start</button>
-          <button class="btn-secondary" onclick="pauseTimer()">Pause</button>
-          <button class="btn-secondary" onclick="resetTimer()">Reset</button>
+        
+        <div class="wellness-timer-display" id="time">25:00</div>
+        
+        <div class="wellness-timer-actions">
+          <button class="btn-primary start-btn" id="startBtn" onclick="toggleTimer()">START</button>
+          <button class="btn-icon-square" onclick="resetTimer()" title="Reset Timer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+          </button>
         </div>
       </div>
 
-      <div class="feature-card">
-        <h2>Healthy Habits</h2>
-        <p class="subtitle">Earn points by completing wellness activities</p>
-        <div class="habit-grid">
-          <button class="habit-btn" onclick="addScore()">&#128167; Drink Water</button>
-          <button class="habit-btn" onclick="addScore()">&#129496; Stretch</button>
-          <button class="habit-btn" onclick="addScore()">&#127788; Breathing</button>
-        </div>
-        <div class="score-display">
-          <span>Your Score:</span>
-          <span id="score" class="score-value">0</span>
+      <!-- Quick Log Card -->
+      <div class="dash-card quick-log-card">
+        <h3 class="quick-log-title">Quick Log</h3>
+        
+        <div class="quick-log-list">
+          <!-- Hydration -->
+          <div class="quick-log-item">
+            <div class="ql-icon icon-water"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
+            <div class="ql-info">
+              <h4>Hydration</h4>
+              <span id="qlHydrationStatus">Today: 0 ml</span>
+            </div>
+            <button class="btn-ql" onclick="logHydration()">+250 ml</button>
+          </div>
+
+          <!-- Stretching -->
+          <div class="quick-log-item">
+            <div class="ql-icon icon-timer" style="background: #fdf4ff; color: #c026d3;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="ql-info">
+              <h4>Stretching</h4>
+              <span id="qlStretchStatus">Today: 0 mins</span>
+            </div>
+            <button class="btn-ql" onclick="logActivity()">+15 mins</button>
+          </div>
+
+          <!-- Focus Sessions -->
+          <div class="quick-log-item">
+            <div class="ql-icon icon-focus" style="background: #fefce8; color: #eab308;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></div>
+            <div class="ql-info">
+              <h4>Focus Sessions</h4>
+              <span id="qlFocusStatus">Today: 0 mins</span>
+            </div>
+            <button class="btn-ql" onclick="logFocusSession()">+25 mins</button>
+          </div>
         </div>
       </div>
     </section>

@@ -3,11 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register</title>
-    <!-- global stylesheet -->
+    <title>Register – Health Companion</title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      /* simple responsive login form styles */
       .login-container {
         display: flex;
         align-items: center;
@@ -16,122 +14,128 @@
         padding: 24px;
         background: #f5f7fa;
       }
-
       .login-card {
         background: #fff;
         padding: 32px 24px;
         border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         max-width: 400px;
         width: 100%;
       }
-
-      .login-card h2 {
-        margin-bottom: 24px;
-        text-align: center;
-        font-size: 1.5rem;
-        color: #1e293b;
-      }
-
-      .login-card label {
-        display: block;
-        margin: 12px 0 6px;
-        font-weight: 500;
-        font-size: 0.95rem;
-      }
-
-      .login-card input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 0.95rem;
-      }
-
-      .login-card .btn-primary {
-        width: 100%;
-        margin-top: 24px;
-      }
-
-      @media (max-width: 480px) {
-        .login-card {
-          padding: 24px 16px;
-        }
-      }
+      .login-card h2 { margin-bottom: 24px; text-align: center; font-size: 1.5rem; color: #1e293b; }
+      .login-card label { display: block; margin: 12px 0 6px; font-weight: 500; font-size: 0.95rem; }
+      .login-card input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; }
+      .login-card .btn-primary { width: 100%; margin-top: 24px; }
+      .error-msg { color: #e00; text-align: center; margin-top: 8px; display: none; font-size: 0.9rem; }
+      .success-msg { color: #0a0; text-align: center; margin-top: 8px; display: none; font-size: 0.9rem; }
+      @media (max-width: 480px) { .login-card { padding: 24px 16px; } }
     </style>
   </head>
-  <body>
-    <div class="login-container">
-      <div class="login-card">
+  <body style="background: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    <nav class="navbar">
+      <a href="index.html" class="logo">Health Companion</a>
+    </nav>
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>📝 Register</h1>
+        <p>Create an account to track your health journey.</p>
+      </div>
+    </section>
+    <section class="dashboard-cards-container" style="max-width: 500px; width: 100%;">
+      <div class="dash-card login-card" style="margin: 0 auto; width: 100%;">
         <h2>Create Account</h2>
-        <p id="errorMsg" style="color:#e00; text-align:center; display:none;"></p>
-        <form id="registerForm" action="https://health-tech-and-wellbeing-project.onrender.com/register" method="post">
+        <p id="errorMsg" class="error-msg"></p>
+        <p id="successMsg" class="success-msg"></p>
+
+        <form id="registerForm">
           <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="Your username" required>
+          <input type="text" id="username" name="username" placeholder="Your username" required />
 
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required />
 
           <label for="password">Password</label>
           <div style="position:relative;">
-            <input type="password" id="password" name="password" placeholder="Create a password" required style="padding-right:32px;">
-            <span id="togglePwd" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:1.1rem; color:#888;">👁️</span>
+            <input type="password" id="password" name="password" placeholder="Create a password" required style="padding-right:40px;" />
+            <span id="togglePwd" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:#888;">👁️</span>
           </div>
-
-          <small id="pwdHint" style="display:block; font-size:0.85rem; color:#555;">
-            Minimum 8 characters, one uppercase, one number and one special character.
+          <small style="display:block;font-size:0.82rem;color:#666;margin-top:4px;">
+            Min 8 chars, one uppercase, one number, one special character.
           </small>
 
           <button type="submit" class="btn-primary" id="Sign_up">Sign Up</button>
         </form>
-        <p style="text-align:center; margin-top:16px;">
+
+        <p style="text-align:center;margin-top:16px;">
           Already have an account? <a href="login.html">Log in</a>
         </p>
       </div>
     </div>
+
     <script>
-      // Check if the page is opened directly from file system
-      if (window.location.protocol === 'file:') {
-        document.body.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100vh; font-family:Arial, sans-serif;"><div style="text-align:center;"><h1>Please Run the Server</h1><p>To use the sign-up functionality, please run the server first:</p><code>npm run dev</code><p>Then open <a href="http://localhost:3000/register.html">http://localhost:3000/register.html</a> in your browser.</p></div></div>';
-      }
+      // Redirect if already logged in
+      fetch('/api/me', { credentials: 'include' })
+        .then(r => r.ok ? r.json() : null)
+        .then(user => { if (user) window.location.href = 'index.html'; });
 
-      function showErrorMessage() {
-        const params = new URLSearchParams(window.location.search);
-        const msg = document.getElementById('errorMsg');
-        const err = params.get('error');
-        if (err === 'exists') {
-          msg.textContent = 'User already exists. Please choose a different username or email.';
-          msg.style.display = 'block';
-        } else if (err === 'weakpassword') {
-          msg.textContent = 'Password does not meet complexity requirements.';
-          msg.style.display = 'block';
-        }
-      }
-      document.getElementById('registerForm').addEventListener('submit', function(e) {
-        const pwd = document.getElementById('password').value;
-        let errors = [];
-        if (pwd.length < 8) errors.push("at least 8 characters");
-        if (!/[A-Z]/.test(pwd)) errors.push("an uppercase letter");
-        if (!/\d/.test(pwd)) errors.push("a number");
-        if (!/[^A-Za-z0-9]/.test(pwd)) errors.push("a special character");
-        if (errors.length > 0) {
-          e.preventDefault();
-          alert('Password must include: ' + errors.join(', ') + '.');
-        }
-      });
-
-      document.getElementById('togglePwd').addEventListener('click', function() {
+      document.getElementById('togglePwd').addEventListener('click', function () {
         const input = document.getElementById('password');
-        if (input.type === 'password') {
-          input.type = 'text';
-          this.textContent = '🙈';
-        } else {
-          input.type = 'password';
-          this.textContent = '👁️';
-        }
+        input.type = input.type === 'password' ? 'text' : 'password';
+        this.textContent = input.type === 'password' ? '👁️' : '🙈';
       });
 
-      showErrorMessage();
+      document.getElementById('registerForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const errorEl   = document.getElementById('errorMsg');
+        const successEl = document.getElementById('successMsg');
+        const btn       = document.getElementById('Sign_up');
+        errorEl.style.display  = 'none';
+        successEl.style.display = 'none';
+
+        // Client-side password validation
+        const pwd = document.getElementById('password').value;
+        const ok  = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
+        if (!ok) {
+          errorEl.textContent   = 'Password must be 8+ chars with an uppercase, a number, and a special character.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        btn.disabled    = true;
+        btn.textContent = 'Creating account...';
+
+        const body = {
+          username: document.getElementById('username').value.trim(),
+          email:    document.getElementById('email').value.trim(),
+          password: pwd,
+        };
+
+        try {
+          const res  = await fetch('/api/register', {
+            method:      'POST',
+            credentials: 'include',
+            headers:     { 'Content-Type': 'application/json' },
+            body:        JSON.stringify(body),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            errorEl.textContent    = data.error || 'Registration failed.';
+            errorEl.style.display  = 'block';
+            btn.disabled           = false;
+            btn.textContent        = 'Sign Up';
+          } else {
+            successEl.textContent   = `Account created! Welcome, ${data.user.username}! Redirecting...`;
+            successEl.style.display = 'block';
+            setTimeout(() => window.location.href = 'index.html', 1200);
+          }
+        } catch (err) {
+          errorEl.textContent   = 'Network error. Is the server running?';
+          errorEl.style.display = 'block';
+          btn.disabled          = false;
+          btn.textContent       = 'Sign Up';
+        }
+      });
     </script>
   </body>
 </html>
