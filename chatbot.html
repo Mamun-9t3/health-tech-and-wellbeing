@@ -1,286 +1,217 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Doctor - Health Companion</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <style>
-    /* ── Chat layout ─────────────────────────────────────── */
-    .chat-layout {
-      display: flex;
-      height: calc(100vh - 64px);
-      overflow: hidden;
-    }
-
-    /* ── Sidebar ─────────────────────────────────────────── */
-    .chat-sidebar {
-      width: 220px;
-      min-width: 220px;
-      background: #f8fafc;
-      border-right: 1px solid #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      padding: 16px 12px;
-      gap: 12px;
-      overflow-y: auto;
-    }
-
-    .btn-new-chat {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #1e293b;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    .btn-new-chat:hover {
-      border-color: #0ea5e9;
-      background: #f0f9ff;
-    }
-
-    .sidebar-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0 4px;
-    }
-
-    .session-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .session-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      color: #475569;
-      transition: background 0.15s, color 0.15s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .session-item:hover {
-      background: #e8f4fd;
-      color: #0ea5e9;
-    }
-
-    .session-item.active {
-      background: #dbeafe;
-      color: #2563eb;
-      font-weight: 500;
-    }
-
-    .session-item svg {
-      flex-shrink: 0;
-      opacity: 0.5;
-    }
-
-    /* ── Hero ────────────────────────────────────────────── */
-    .chat-hero {
-      background: linear-gradient(135deg, #0ea5e9, #2563eb);
-      color: #fff;
-      padding: 24px 32px;
-      text-align: center;
-    }
-
-    .chat-hero h1 {
-      font-size: 1.5rem;
-      margin: 0 0 4px;
-    }
-
-    .chat-hero p {
-      font-size: 0.9rem;
-      margin: 0;
-      opacity: 0.88;
-    }
-
-    /* ── Main chat panel ─────────────────────────────────── */
-    .chat-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* chatbox */
-    .chatbox {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #f8fafc;
-    }
-
-    .chat-message {
-      max-width: 72%;
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-
-    .chat-message.user {
-      align-self: flex-end;
-      background: #2563eb;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .chat-message.bot {
-      align-self: flex-start;
-      background: #fff;
-      color: #1e293b;
-      border: 1px solid #e2e8f0;
-      border-bottom-left-radius: 4px;
-    }
-
-    .chat-message strong {
-      display: block;
-      margin-bottom: 3px;
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
-
-    /* bottom input */
-    .chat-footer {
-      padding: 14px 20px;
-      border-top: 1px solid #e2e8f0;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .chat-input-row input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 0.92rem;
-      font-family: 'Poppins', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .chat-input-row input:focus {
-      border-color: #0ea5e9;
-    }
-
-    .chat-input-row button {
-      padding: 12px 22px;
-      border-radius: 10px;
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      font-size: 0.92rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    .chat-input-row button:hover {
-      background: #1d4ed8;
-    }
-
-    .chat-input-row button:disabled {
-      background: #93c5fd;
-      cursor: not-allowed;
-    }
-
-    /* symptom hint tags */
-    .hint-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .tag {
-      padding: 5px 12px;
-      border-radius: 20px;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      font-size: 0.8rem;
-      color: #475569;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .tag:hover {
-      background: #dbeafe;
-      border-color: #93c5fd;
-      color: #2563eb;
-    }
-
-    @media (max-width: 600px) {
-      .chat-sidebar {
-        display: none;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Doctor - Health Companion</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      /* ── Chat layout ─────────────────────────────────────── */
+      .chat-layout {
+        display: flex;
+        height: calc(100vh - 64px);
+        overflow: hidden;
       }
-    }
-  </style>
-</head>
 
-<body>
-  <nav class="navbar">
-    <a href="index.html" class="logo">Health Companion</a>
-    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle menu">&#9776;</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="wellness.html">Wellness</a></li>
-      <li><a href="symptoms.html">Symptoms</a></li>
-      <li><a href="clinics.html">Clinics</a></li>
-      <li><a href="chatbot.html" class="active">AI Doctor</a></li>
-    </ul>
-  </nav>
+      /* ── Sidebar ─────────────────────────────────────────── */
+      .chat-sidebar {
+        width: 220px;
+        min-width: 220px;
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 12px;
+        gap: 12px;
+        overflow-y: auto;
+      }
 
-  <section class="dashboard-hero">
-    <div class="dashboard-hero-content">
-      <h1>🤖 AI Doctor</h1>
-      <p>Get quick health guidance from our AI-powered assistant.</p>
-    </div>
-  </section>
+      .btn-new-chat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #1e293b;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        font-family: 'Poppins', sans-serif;
+      }
+      .btn-new-chat:hover { border-color: #0ea5e9; background: #f0f9ff; }
 
-  <section class="dashboard-cards-container" style="max-width: 1000px; width: 100%; margin-bottom: 40px;">
-    <div class="dash-card chat-layout" style="flex-direction: row; padding: 0; overflow: hidden; height: 500px;">
+      .sidebar-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0 4px;
+      }
+
+      .session-list { display: flex; flex-direction: column; gap: 2px; }
+
+      .session-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #475569;
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .session-item:hover { background: #e8f4fd; color: #0ea5e9; }
+      .session-item.active { background: #dbeafe; color: #2563eb; font-weight: 500; }
+
+      .session-item svg { flex-shrink: 0; opacity: 0.5; }
+
+      /* ── Hero ────────────────────────────────────────────── */
+      .chat-hero {
+        background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        color: #fff;
+        padding: 24px 32px;
+        text-align: center;
+      }
+      .chat-hero h1 { font-size: 1.5rem; margin: 0 0 4px; }
+      .chat-hero p  { font-size: 0.9rem; margin: 0; opacity: 0.88; }
+
+      /* ── Main chat panel ─────────────────────────────────── */
+      .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* chatbox */
+      .chatbox {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #f8fafc;
+      }
+
+      .chat-message {
+        max-width: 72%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        font-size: 0.92rem;
+        line-height: 1.55;
+      }
+      .chat-message.user {
+        align-self: flex-end;
+        background: #2563eb;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .chat-message.bot {
+        align-self: flex-start;
+        background: #fff;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+      }
+      .chat-message strong { display: block; margin-bottom: 3px; font-size: 0.8rem; opacity: 0.7; }
+
+      /* bottom input */
+      .chat-footer {
+        padding: 14px 20px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .chat-input-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .chat-input-row input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        font-family: 'Poppins', sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .chat-input-row input:focus { border-color: #0ea5e9; }
+      .chat-input-row button {
+        padding: 12px 22px;
+        border-radius: 10px;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        font-size: 0.92rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-family: 'Poppins', sans-serif;
+      }
+      .chat-input-row button:hover { background: #1d4ed8; }
+      .chat-input-row button:disabled { background: #93c5fd; cursor: not-allowed; }
+
+      /* symptom hint tags */
+      .hint-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tag {
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        font-size: 0.8rem;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .tag:hover { background: #dbeafe; border-color: #93c5fd; color: #2563eb; }
+
+      @media (max-width: 600px) {
+        .chat-sidebar { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" class="logo">Health Companion</a>
+      <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle menu">&#9776;</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wellness.html">Wellness</a></li>
+        <li><a href="symptoms.html">Symptoms</a></li>
+        <li><a href="clinics.html">Clinics</a></li>
+        <li><a href="chatbot.html" class="active">AI Doctor</a></li>
+      </ul>
+    </nav>
+
+    <section class="dashboard-hero">
+      <div class="dashboard-hero-content">
+        <h1>🤖 AI Doctor</h1>
+        <p>Get quick health guidance from our AI-powered assistant.</p>
+      </div>
+    </section>
+
+    <section class="dashboard-cards-container" style="max-width: 1000px; width: 100%; margin-bottom: 40px;">
+      <div class="dash-card chat-layout" style="flex-direction: row; padding: 0; overflow: hidden; height: 650px;">
       <!-- ── Sidebar ── -->
       <aside class="chat-sidebar">
         <button class="btn-new-chat" onclick="startNewChat()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New chat
         </button>
         <span class="sidebar-label">Recent</span>
@@ -314,14 +245,13 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
+      </div>
+    </section>
 
-  <script src="js/script.js"></script>
-  <script>
-    // Load session list on page load
-    loadSessionList();
-  </script>
-</body>
-
+    <script src="js/script.js"></script>
+    <script>
+      // Load session list on page load
+      loadSessionList();
+    </script>
+  </body>
 </html>
