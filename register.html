@@ -103,6 +103,9 @@
 
         btn.disabled    = true;
         btn.textContent = 'Creating account...';
+        
+        // Clear any old dashboard state from previous accounts
+        localStorage.removeItem('hc_dashboardState');
 
         const body = {
           username: document.getElementById('username').value.trim(),

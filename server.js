@@ -230,7 +230,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
       [req.user.id]
     );
     if (result.rows.length === 0) {
-      res.json({ wellness: 12, hydration: 0, activeMins: 0, focusMins: 0 });
+      res.json({ wellness: 0, hydration: 0, activeMins: 0, focusMins: 0 });
     } else {
       const dbState = result.rows[0];
       res.json({
@@ -259,7 +259,7 @@ app.post('/api/dashboard', authMiddleware, async (req, res) => {
          active_mins = EXCLUDED.active_mins,
          focus_mins = EXCLUDED.focus_mins,
          updated_at = NOW()`,
-      [req.user.id, wellness || 12, hydration || 0, activeMins || 0, focusMins || 0]
+      [req.user.id, wellness || 0, hydration || 0, activeMins || 0, focusMins || 0]
     );
     res.json({ message: 'Dashboard state saved.' });
   } catch (err) {

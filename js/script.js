@@ -29,6 +29,7 @@ function toggleMenu() {
         document.addEventListener('click', function (e) {
           if (e.target && e.target.id === 'logoutBtn') {
             e.preventDefault();
+            localStorage.removeItem('hc_dashboardState');
             fetch('/api/logout', { method: 'POST', credentials: 'include' })
               .then(() => window.location.href = 'login.html');
           }
@@ -604,7 +605,7 @@ async function getNearestHospitalDataForChat(doctorSpecialty) {
 // Note: findHospitals() is triggered manually by the Find Nearby button only
 // ===== Homepage Dashboard Logging & Toasts =====
 let dashboardState = JSON.parse(localStorage.getItem('hc_dashboardState')) || {
-  wellness: 12,
+  wellness: 0,
   hydration: 0,
   activeMins: 0,
   focusMins: 0
